@@ -5,7 +5,7 @@ const xml2js = require('xml2js');
 const app = express();
 
 const REPO_URL_BASE = process.env.REPO_URL_BASE || 'https://repo.maven.apache.org/maven2';
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 
 app.get('*path', async (req, res) => {
   const pathArr = req.path.split("/")
