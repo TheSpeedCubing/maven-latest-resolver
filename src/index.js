@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 80;
 const REDIRECT_URL_REMOVE = process.env.REDIRECT_URL_REMOVE || '';
 
 app.get('*path', async (req, res) => {
-  const path = req.path
+  let path = req.path
   if (path.startsWith(REDIRECT_URL_REMOVE)) {
     path = path.slice(REDIRECT_URL_REMOVE.length);
   }
@@ -22,22 +22,42 @@ app.get('*path', async (req, res) => {
   }
 
   try {
+    
+    const headers = {};
+    if (req.headers.authorization) {
+      headers.Authorization = req.headers.authorization;
+    }
   
     const paths = [...pathArr];
     paths.pop();
     paths.push('maven-metadata.xml');
-    res.redirect(REPO_URL_BASE + paths.join("/"));
     
-    const response = await axios.get(metadataURL);
+    const metadataURL = REPO_URL_BASE + paths.join("/");
+    
+    const response = await axios.get(metadataURL, {headers});
     const metadata = await xml2js.parseStringPromise(response.data);
     
-    const snapshotVersion = metadata['metadata']['versioning'][0]['snapshotVersions'][0]['snapshotVersion'][1]['value'][0]
+    const snapshotVersions = metadata?.metadata?.versioning?.[0]?.snapshotVersions?.[0]?.snapshotVersion;
+    const snapshotVersion = snapshotVersions?.[1]?.value?.[0];
+    if (!snapshotVersion) {
+      throw new Error('Snapshot version not found in metadata.');
+    }
 
     paths.pop();
-    let finalURL = REPO_URL_BASE + paths.join('/') + "/" + pathArr[pathArr.length - 1].replace("latest", snapshotVersion)
+    
+    const finalURL = REPO_URL_BASE + paths.join('/') + "/" + pathArr[pathArr.length - 1].replace("latest", snapshotVersion)
 
     console.log(req.url + " -> " + finalURL)
-    res.redirect(finalURL)
+    const fileResponse = await axios.get(finalURL, {
+      headers, 
+      responseType: 'stream'
+    });
+
+    res.status(fileResponse.status);
+    for (const [key, value] of Object.entries(fileResponse.headers)) {
+      res.setHeader(key, value);
+    }
+    fileResponse.data.pipe(res);
 
   } catch (err) {
     console.error(err);
