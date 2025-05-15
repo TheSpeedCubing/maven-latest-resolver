@@ -12,7 +12,7 @@ app.get('*path', async (req, res) => {
   
   const regex = /-latest\.[\w.]+$/;
   if (!regex.test(pathArr[pathArr.length -1])) {
-    res.redirect(SONATYPE_BASE + req.path);
+    res.redirect(REPO_URL_BASE + req.path);
     console.log("REDIR")
     return;
   }
