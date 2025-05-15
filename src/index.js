@@ -24,6 +24,7 @@ app.get('*path', async (req, res) => {
     paths.pop();
     paths.push('maven-metadata.xml');
     const metadataURL = REPO_URL_BASE + paths.join('/')
+    metadataURL = metadataURL.replace(REDIRECT_URL_REMOVE, "")
     
     const response = await axios.get(metadataURL);
     const metadata = await xml2js.parseStringPromise(response.data);
