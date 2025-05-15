@@ -6,6 +6,7 @@ const app = express();
 
 const REPO_URL_BASE = process.env.REPO_URL_BASE || 'https://repo.maven.apache.org/maven2';
 const PORT = process.env.PORT || 80;
+const REDIRECT_URL_REMOVE = process.env.REDIRECT__URL || '';
 
 app.get('*path', async (req, res) => {
   const pathArr = req.path.split("/")
@@ -30,7 +31,8 @@ app.get('*path', async (req, res) => {
     const snapshotVersion = metadata['metadata']['versioning'][0]['snapshotVersions'][0]['snapshotVersion'][1]['value'][0]
 
     paths.pop();
-    const finalURL = REPO_URL_BASE + paths.join('/') + "/" + pathArr[pathArr.length - 1].replace("latest", snapshotVersion)
+    let finalURL = REPO_URL_BASE + paths.join('/') + "/" + pathArr[pathArr.length - 1].replace("latest", snapshotVersion)
+    finalURL = finalURL.replace(REDIRECT_URL_REMOVE, "")
 
     console.log(req.url + " -> " + finalURL)
     res.redirect(finalURL)
