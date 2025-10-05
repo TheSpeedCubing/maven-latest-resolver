@@ -44,7 +44,6 @@ services:
       - ./mounts/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - nexus
-      - maven-latest-resolver
 
 volumes:
   nexus-data:
