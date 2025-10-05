@@ -38,8 +38,6 @@ services:
   nexus-nginx:
     image: nginx:stable
     container_name: nexus-nginx
-    networks:
-      - common-network
     pull_policy: always
     restart: unless-stopped
     volumes:
@@ -52,11 +50,6 @@ volumes:
   nexus-data:
     name: nexus-data
     external: true
-
-networks:
-  common-network:
-    external: true
-
 ```
 
 Nginx Reverse Proxy
